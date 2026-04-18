@@ -1,0 +1,17 @@
+{
+  "name": "LiveLoc Tracking",
+  "short_name": "LiveLoc",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#f97316",
+  "description": "Secure real-time location sharing bridge.",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/854/854878.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
