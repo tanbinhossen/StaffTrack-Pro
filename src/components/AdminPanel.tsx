@@ -129,14 +129,16 @@ const AdminPanel: React.FC = () => {
   return (
     <div className="flex h-[100dvh] bg-neutral-100 overflow-hidden font-sans relative">
       {/* Top Navigation Bar for Mobile */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-neutral-200 z-50 flex items-center justify-between px-6 shadow-sm">
-        <div className="flex items-center gap-2">
+      <header className={`lg:hidden fixed top-0 left-0 right-0 h-16 z-50 flex items-center justify-between px-6 transition-all ${
+        currentView === 'track' ? 'bg-transparent' : 'bg-white border-b border-neutral-200 shadow-sm'
+      }`}>
+        <div className={`flex items-center gap-2 transition-opacity ${currentView === 'track' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
            <Shield className="w-5 h-5 text-orange-600" />
            <span className="font-black text-neutral-900 uppercase tracking-tight text-sm">LiveLoc Admin</span>
         </div>
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="text-neutral-800 p-2"
+          className={`p-2 transition-colors ${currentView === 'track' ? 'bg-white/90 backdrop-blur-md rounded-xl shadow-lg border border-neutral-200' : 'text-neutral-800'}`}
         >
           {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
@@ -205,7 +207,7 @@ const AdminPanel: React.FC = () => {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main className="flex-1 relative z-10 pt-16 lg:pt-0 h-full overflow-hidden flex flex-col">
+      <main className={`flex-1 relative z-10 lg:pt-0 h-full overflow-hidden flex flex-col ${currentView === 'track' ? 'pt-0' : 'pt-16'}`}>
         {currentView === 'track' && (
           <div className="flex-1 relative">
             <div className="absolute top-4 left-4 z-20 pointer-events-none lg:block hidden">
