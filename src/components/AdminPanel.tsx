@@ -30,7 +30,7 @@ async function getAddress(lat: number, lng: number) {
   }
 }
 
-function LocationMarker({ loc, map }: { loc: any, map: any }) {
+function LocationMarker({ loc, map }: { loc: any, map: any, key?: string }) {
   const [address, setAddress] = useState<string>("Loading address...");
 
   const fetchAddress = async () => {
@@ -104,6 +104,7 @@ const AdminPanel: React.FC = () => {
   const [locations, setLocations] = useState<any[]>([]);
   const [selectedUid, setSelectedUid] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [currentView, setCurrentView] = useState<'home' | 'track' | 'details' | 'contact'>('track');
   const { logOut } = useAuth();
 
   useEffect(() => {
@@ -119,90 +120,73 @@ const AdminPanel: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  return (
-    <div className="flex h-screen bg-neutral-100 overflow-hidden font-sans relative">
-      {/* Mobile Toggle Button */}
-      <button 
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="lg:hidden fixed bottom-6 right-6 z-50 bg-orange-600 text-white p-4 rounded-full shadow-2xl active:scale-95 transition-transform"
-      >
-        {isSidebarOpen ? <X className="w-6 h-6" /> : <Users className="w-6 h-6" />}
-      </button>
+  const menuItems = [
+    { id: 'home', label: 'Admin Home', icon: Shield },
+    { id: 'track', label: 'Live Tracking', icon: Navigation },
+    { id: 'details', label: 'User Details', icon: Users },
+  ];
 
-      {/* Sidebar - Responsive */}
+  return (
+    <div className="flex h-[100dvh] bg-neutral-100 overflow-hidden font-sans relative">
+      {/* Top Navigation Bar for Mobile */}
+      <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-neutral-200 z-50 flex items-center justify-between px-6 shadow-sm">
+        <div className="flex items-center gap-2">
+           <Shield className="w-5 h-5 text-orange-600" />
+           <span className="font-black text-neutral-900 uppercase tracking-tight text-sm">LiveLoc Admin</span>
+        </div>
+        <button 
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="text-neutral-800 p-2"
+        >
+          {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+      </header>
+
+      {/* Sidebar - Pro Navigation */}
       <aside className={`
-        fixed inset-y-0 left-0 z-40 w-80 bg-white border-r border-neutral-200 flex flex-col shadow-xl transition-transform duration-300 ease-in-out
+        fixed inset-y-0 left-0 z-[60] w-[280px] bg-neutral-900 text-white flex flex-col shadow-2xl transition-transform duration-300 ease-in-out
         lg:translate-x-0 lg:static lg:block
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="p-6 border-b border-neutral-100 bg-neutral-50/50">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="bg-orange-600 p-2.5 rounded-2xl shadow-lg shadow-orange-600/20">
+        <div className="p-8">
+          <div className="flex items-center gap-3 mb-10">
+            <div className="bg-orange-600 p-2.5 rounded-2xl">
               <Shield className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-black text-neutral-900 tracking-tight leading-none">LiveLoc</h1>
-              <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-orange-600 mt-1">Admin Console</p>
+              <h1 className="text-xl font-black tracking-tight leading-none text-white">LiveLoc</h1>
+              <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-orange-500 mt-1">Satellite Hub</p>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-4 border border-neutral-200 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">Live Units</p>
-              <p className="text-2xl font-black text-neutral-900">{locations.length}</p>
-            </div>
-            <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-4 space-y-2">
-          <p className="px-2 text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2">Tracked Personnel</p>
-          {locations.length === 0 ? (
-            <div className="py-12 text-center">
-              <p className="text-neutral-300 text-sm italic">No users active</p>
-            </div>
-          ) : (
-            locations.map((loc) => (
+          <nav className="space-y-2">
+            {menuItems.map((item) => (
               <button
-                key={loc.id}
+                key={item.id}
                 onClick={() => {
-                  setSelectedUid(loc.uid);
-                  if (window.innerWidth < 1024) setIsSidebarOpen(false);
+                  setCurrentView(item.id as any);
+                  setIsSidebarOpen(false);
                 }}
-                className={`w-full text-left p-4 rounded-2xl transition-all border flex items-center gap-4 ${
-                  selectedUid === loc.uid 
-                  ? 'bg-orange-50 border-orange-200 shadow-sm' 
-                  : 'bg-white border-transparent hover:bg-neutral-50'
+                className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold text-sm transition-all ${
+                  currentView === item.id 
+                    ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' 
+                    : 'text-neutral-400 hover:text-white hover:bg-white/5'
                 }`}
               >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 ${
-                  selectedUid === loc.uid ? 'bg-orange-500' : 'bg-neutral-200 text-neutral-500'
-                }`}>
-                  {loc.displayName?.[0] || 'U'}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-neutral-800 truncate leading-tight">{loc.displayName || 'Anonymous User'}</p>
-                  <p className="text-[10px] text-neutral-400 truncate font-medium">
-                    {new Date(loc.timestamp?.toDate ? loc.timestamp.toDate() : loc.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-                {selectedUid === loc.uid && (
-                  <div className="w-2 h-2 bg-orange-500 rounded-full" />
-                )}
+                <item.icon className="w-5 h-5" />
+                {item.label}
               </button>
-            ))
-          )}
+            ))}
+          </nav>
         </div>
 
-        <div className="p-4 border-t border-neutral-100 mt-auto">
+        <div className="mt-auto p-8 border-t border-white/5">
           <button 
             onClick={logOut}
-            className="w-full flex items-center justify-center gap-2 py-3 text-neutral-500 hover:text-red-500 transition-colors font-bold text-sm bg-neutral-50 rounded-xl border border-neutral-100 hover:bg-red-50 hover:border-red-100 shadow-sm"
+            className="w-full flex items-center justify-center gap-3 py-4 text-red-400 hover:text-red-300 transition-colors font-bold text-xs bg-red-400/5 rounded-2xl border border-red-400/10"
           >
             <LogOut className="w-4 h-4" />
-            <span>Terminate Session</span>
+            <span>Sign Out Control</span>
           </button>
         </div>
       </aside>
@@ -215,27 +199,119 @@ const AdminPanel: React.FC = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsSidebarOpen(false)}
-            className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-30"
+            className="lg:hidden fixed inset-0 bg-neutral-950/60 backdrop-blur-md z-[55]"
           />
         )}
       </AnimatePresence>
 
-      {/* Main Map Area */}
-      <main className="flex-1 relative z-10">
-        <div className="absolute top-4 left-4 right-4 lg:left-6 lg:right-auto z-20 pointer-events-none">
-           <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl border border-neutral-200 shadow-xl flex items-center justify-between lg:justify-start gap-4 inline-flex">
-              <div className="flex items-center gap-2.5">
-                <Navigation className="w-4 h-4 text-orange-600 animate-pulse" />
-                <p className="text-xs font-black text-neutral-900 tracking-tight">Active Satellite Stream</p>
-              </div>
-              <div className="h-4 w-px bg-neutral-200 hidden lg:block" />
-              <p className="text-[10px] font-bold text-neutral-500 lg:block hidden">SECURE LINK: {locations.length} NODES</p>
-           </div>
-        </div>
+      {/* Main Content Area */}
+      <main className="flex-1 relative z-10 pt-16 lg:pt-0 h-full overflow-hidden flex flex-col">
+        {currentView === 'track' && (
+          <div className="flex-1 relative">
+            <div className="absolute top-4 left-4 z-20 pointer-events-none lg:block hidden">
+               <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl border border-neutral-200 shadow-xl">
+                  <p className="text-[10px] font-black text-neutral-900 tracking-widest uppercase">Live Tracking Active</p>
+               </div>
+            </div>
+            
+            {/* User List Overlay for Track View (Desktop) */}
+            <div className="absolute bottom-6 left-6 z-20 hidden lg:block w-72">
+               <div className="bg-white/90 backdrop-blur-md rounded-[2rem] border border-neutral-200 shadow-2xl overflow-hidden">
+                  <div className="p-5 border-b border-neutral-100 bg-neutral-50/50">
+                     <p className="text-[10px] font-black uppercase text-neutral-400 tracking-widest">Active Personnel</p>
+                  </div>
+                  <div className="max-h-60 overflow-y-auto p-2 space-y-1">
+                     {locations.map(loc => (
+                        <button
+                          key={loc.id}
+                          onClick={() => setSelectedUid(loc.uid)}
+                          className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all ${
+                            selectedUid === loc.uid ? 'bg-orange-600 text-white' : 'hover:bg-neutral-100 text-neutral-700'
+                          }`}
+                        >
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black ${
+                            selectedUid === loc.uid ? 'bg-white text-orange-600' : 'bg-neutral-200'
+                          }`}>
+                            {loc.displayName?.[0] || 'U'}
+                          </div>
+                          <span className="text-xs font-bold truncate">{loc.displayName}</span>
+                        </button>
+                     ))}
+                  </div>
+               </div>
+            </div>
 
-        <MapContainer center={[23.685, 90.3563]} zoom={7} className="h-full w-full">
-          <MapView locations={locations} selectedUid={selectedUid} />
-        </MapContainer>
+            <MapContainer center={[23.685, 90.3563]} zoom={7} className="h-full w-full outline-none">
+              <MapView locations={locations} selectedUid={selectedUid} />
+            </MapContainer>
+          </div>
+        )}
+
+        {currentView === 'home' && (
+          <div className="flex-1 overflow-y-auto p-6 md:p-12 bg-neutral-50">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+              <h2 className="text-3xl font-[1000] text-neutral-900 mb-2 italic">Operation Overview</h2>
+              <p className="text-neutral-500 font-medium mb-12 uppercase tracking-[0.2em] text-[10px]">Command Center Dashboard</p>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-neutral-100">
+                  <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-2">Total Units</p>
+                  <p className="text-5xl font-black text-neutral-900">{locations.length}</p>
+                </div>
+                <div className="bg-orange-600 p-8 rounded-[2.5rem] shadow-xl shadow-orange-600/20 text-white">
+                  <p className="text-[10px] font-black text-neutral-100/60 uppercase tracking-widest mb-2">Signal Status</p>
+                  <p className="text-2xl font-black italic">OPTIMIZED</p>
+                </div>
+              </div>
+
+              <div className="bg-white p-8 rounded-[3rem] shadow-xl border border-neutral-100 flex items-center gap-6">
+                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center animate-pulse">
+                  <Navigation className="w-8 h-8 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-neutral-900">System Ready</h3>
+                  <p className="text-neutral-500 text-sm font-medium">Global satellite synchronization is active and stable.</p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {currentView === 'details' && (
+          <div className="flex-1 overflow-y-auto p-6 md:p-12 bg-neutral-50">
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+              <h2 className="text-3xl font-[1000] text-neutral-900 mb-8 italic">Personnel Data</h2>
+              
+              <div className="space-y-4">
+                {locations.length === 0 ? (
+                  <div className="text-center py-20 bg-white rounded-[3rem] border border-dashed border-neutral-300">
+                    <p className="text-neutral-400 font-medium italic">No personnel broadcasting signal.</p>
+                  </div>
+                ) : (
+                  locations.map(loc => (
+                    <div key={loc.id} className="bg-white p-6 rounded-[2rem] shadow-md border border-neutral-100 flex items-center justify-between group hover:shadow-xl transition-shadow">
+                      <div className="flex items-center gap-5">
+                        <div className="w-14 h-14 bg-neutral-900 rounded-2xl flex items-center justify-center text-white font-black text-xl">
+                          {loc.displayName?.[0] || 'U'}
+                        </div>
+                        <div>
+                          <p className="text-lg font-black text-neutral-800">{loc.displayName}</p>
+                          <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">ID: {loc.uid.slice(-6)}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-black text-orange-600 uppercase tracking-widest mb-1">Last Contact</p>
+                        <p className="text-sm font-medium text-neutral-900">
+                          {new Date(loc.timestamp?.toDate ? loc.timestamp.toDate() : loc.timestamp).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
       </main>
     </div>
   );
