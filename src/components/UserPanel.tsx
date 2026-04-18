@@ -26,7 +26,12 @@ function RecenterMap({ lat, lng }: { lat: number, lng: number }) {
   return null;
 }
 
-const UserPanel: React.FC = () => {
+interface UserPanelProps {
+  deferredPrompt: any;
+  setDeferredPrompt: (e: any) => void;
+}
+
+const UserPanel: React.FC<UserPanelProps> = ({ deferredPrompt, setDeferredPrompt }) => {
   const { user, logOut } = useAuth();
   const [isSharing, setIsSharing] = useState(false);
   const [coords, setCoords] = useState<{ lat: number, lng: number } | null>(null);
@@ -76,6 +81,18 @@ const UserPanel: React.FC = () => {
       if (watchId !== null) navigator.geolocation.clearWatch(watchId);
     };
   }, [watchId]);
+
+  const handleInstall = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    } else {
+      alert("Tap '⋮' and select 'Add to Home Screen'");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white flex flex-col font-sans overflow-hidden relative">
@@ -154,17 +171,26 @@ const UserPanel: React.FC = () => {
             {isSharing ? 'Terminate Link' : 'Initialize Stream'}
           </button>
 
-          <div className="mt-10 pt-6 border-t border-white/5 w-full flex items-center justify-between">
-             <button 
-              onClick={logOut}
-              className="text-[10px] uppercase tracking-widest font-black text-neutral-500 hover:text-white transition-colors"
-             >
-               Sign Out
-             </button>
-             <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
-                <ShieldCheck className="w-3 h-3 text-emerald-500" />
-                <span className="text-[8px] uppercase font-black tracking-widest text-emerald-500">End-to-End Encrypted</span>
+          <div className="mt-10 pt-6 border-t border-white/5 w-full flex flex-col gap-4">
+             <div className="flex items-center justify-between">
+                <button 
+                  onClick={logOut}
+                  className="text-[10px] uppercase tracking-widest font-black text-neutral-500 hover:text-white transition-colors"
+                >
+                  Sign Out
+                </button>
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+                    <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                    <span className="text-[8px] uppercase font-black tracking-widest text-emerald-500">End-to-End Encrypted</span>
+                </div>
              </div>
+             
+             <button
+               onClick={handleInstall}
+               className="w-full py-3 bg-white/5 border border-white/10 rounded-xl text-neutral-400 font-bold text-[10px] uppercase tracking-widest hover:bg-white/10 transition-colors"
+             >
+               Download App to Phone
+             </button>
           </div>
         </motion.div>
       </main>

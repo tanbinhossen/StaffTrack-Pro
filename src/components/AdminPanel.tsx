@@ -100,7 +100,12 @@ function MapView({ locations, selectedUid }: { locations: any[], selectedUid: st
   );
 }
 
-const AdminPanel: React.FC = () => {
+interface AdminPanelProps {
+  deferredPrompt: any;
+  setDeferredPrompt: (e: any) => void;
+}
+
+const AdminPanel: React.FC<AdminPanelProps> = ({ deferredPrompt, setDeferredPrompt }) => {
   const [locations, setLocations] = useState<any[]>([]);
   const [selectedUid, setSelectedUid] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -125,6 +130,18 @@ const AdminPanel: React.FC = () => {
     { id: 'track', label: 'Live Tracking', icon: Navigation },
     { id: 'details', label: 'User Details', icon: Users },
   ];
+
+  const handleInstall = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    } else {
+      alert("Tap '⋮' and select 'Add to Home Screen'");
+    }
+  };
 
   return (
     <div className="flex h-[100dvh] bg-neutral-100 overflow-hidden font-sans relative">
@@ -179,6 +196,14 @@ const AdminPanel: React.FC = () => {
                 {item.label}
               </button>
             ))}
+            
+            <button
+              onClick={handleInstall}
+              className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold text-sm transition-all text-neutral-400 hover:text-white hover:bg-white/5 mt-4 border border-dashed border-white/10"
+            >
+              <Navigation className="w-5 h-5" />
+              Download App
+            </button>
           </nav>
         </div>
 

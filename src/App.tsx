@@ -10,7 +10,7 @@ import UserPanel from './components/UserPanel';
 import { LogIn, MapPin, Navigation } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-function Dashboard() {
+function Dashboard({ deferredPrompt, setDeferredPrompt }: { deferredPrompt: any, setDeferredPrompt: (e: any) => void }) {
   const { profile, loading } = useAuth();
 
   if (loading) {
@@ -23,24 +23,14 @@ function Dashboard() {
   }
 
   if (profile?.role === 'admin') {
-    return <AdminPanel />;
+    return <AdminPanel deferredPrompt={deferredPrompt} setDeferredPrompt={setDeferredPrompt} />;
   }
 
-  return <UserPanel />;
+  return <UserPanel deferredPrompt={deferredPrompt} setDeferredPrompt={setDeferredPrompt} />;
 }
 
-function Login() {
+function Login({ deferredPrompt, setDeferredPrompt }: { deferredPrompt: any, setDeferredPrompt: (e: any) => void }) {
   const { signIn } = useAuth();
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-
-  useEffect(() => {
-    const handler = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
 
   const handleInstall = async () => {
     if (deferredPrompt) {
@@ -169,6 +159,16 @@ function Login() {
 
 function Main() {
   const { user, loading } = useAuth();
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
 
   if (loading) {
     return (
@@ -179,7 +179,7 @@ function Main() {
     );
   }
 
-  return user ? <Dashboard /> : <Login />;
+  return user ? <Dashboard deferredPrompt={deferredPrompt} setDeferredPrompt={setDeferredPrompt} /> : <Login deferredPrompt={deferredPrompt} setDeferredPrompt={setDeferredPrompt} />;
 }
 
 export default function App() {
