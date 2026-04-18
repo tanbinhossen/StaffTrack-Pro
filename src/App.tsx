@@ -8,7 +8,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import AdminPanel from './components/AdminPanel';
 import UserPanel from './components/UserPanel';
 import { LogIn, MapPin, Navigation } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 
 function Dashboard() {
   const { profile, loading } = useAuth();
@@ -50,14 +50,55 @@ function Login() {
         setDeferredPrompt(null);
       }
     } else {
-      alert("To install: Tap the 3 dots (⋮) in Chrome and select 'Add to Home Screen'");
+      setShowGuide(true);
     }
   };
+
+  const [showGuide, setShowGuide] = useState(false);
   
   return (
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-6 bg-[url('https://picsum.photos/seed/map/1920/1080?blur=10')] bg-cover relative">
       <div className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm" />
       
+      <AnimatePresence>
+        {showGuide && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md p-8 flex items-center justify-center"
+          >
+            <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full relative">
+               <button onClick={() => setShowGuide(false)} className="absolute top-4 right-4 text-neutral-400 p-2 text-xl">&times;</button>
+               <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mb-6">
+                  <Navigation className="w-8 h-8 text-orange-600" />
+               </div>
+               <h3 className="text-xl font-black text-neutral-900 mb-4">How to Install</h3>
+               <div className="space-y-4 text-sm text-neutral-600 font-medium leading-relaxed">
+                  <div className="flex gap-3">
+                     <span className="bg-orange-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
+                     <p>Tap the <span className="font-black text-neutral-900">three dots (⋮)</span> at the top right of Chrome.</p>
+                  </div>
+                  <div className="flex gap-3">
+                     <span className="bg-orange-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
+                     <p>Select <span className="font-black text-neutral-900">"Add to Home Screen"</span> or <span className="font-black text-neutral-900">"Install App"</span>.</p>
+                  </div>
+                  <div className="flex gap-3">
+                     <span className="bg-orange-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
+                     <p>Open LiveLoc from your <span className="font-black text-neutral-900">Phone's Home Screen</span>.</p>
+                  </div>
+               </div>
+               <button 
+                onClick={() => setShowGuide(false)}
+                className="w-full mt-8 py-4 bg-orange-600 text-white rounded-xl font-bold shadow-lg active:scale-95 transition-transform"
+               >
+                 Got it!
+               </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {deferredPrompt && (
         <motion.div 
           initial={{ y: -50, opacity: 0 }}
