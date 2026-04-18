@@ -216,29 +216,37 @@ const AdminPanel: React.FC = () => {
                </div>
             </div>
             
-            {/* User List Overlay for Track View (Desktop) */}
-            <div className="absolute bottom-6 left-6 z-20 hidden lg:block w-72">
-               <div className="bg-white/90 backdrop-blur-md rounded-[2rem] border border-neutral-200 shadow-2xl overflow-hidden">
-                  <div className="p-5 border-b border-neutral-100 bg-neutral-50/50">
+            {/* User List Overlay for Track View (Desktop: Sidebar, Mobile: Horizontal Bottom List) */}
+            <div className="absolute bottom-6 left-0 right-0 lg:left-6 lg:right-auto lg:bottom-6 z-20 px-6 lg:px-0">
+               <div className="bg-white/90 backdrop-blur-md rounded-[2rem] border border-neutral-200 shadow-2xl overflow-hidden lg:w-72">
+                  <div className="p-4 lg:p-5 border-b border-neutral-100 bg-neutral-50/50 flex items-center justify-between">
                      <p className="text-[10px] font-black uppercase text-neutral-400 tracking-widest">Active Personnel</p>
+                     <p className="text-[10px] font-bold text-orange-600 lg:hidden">{locations.length} Online</p>
                   </div>
-                  <div className="max-h-60 overflow-y-auto p-2 space-y-1">
-                     {locations.map(loc => (
-                        <button
-                          key={loc.id}
-                          onClick={() => setSelectedUid(loc.uid)}
-                          className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all ${
-                            selectedUid === loc.uid ? 'bg-orange-600 text-white' : 'hover:bg-neutral-100 text-neutral-700'
-                          }`}
-                        >
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black ${
-                            selectedUid === loc.uid ? 'bg-white text-orange-600' : 'bg-neutral-200'
-                          }`}>
-                            {loc.displayName?.[0] || 'U'}
-                          </div>
-                          <span className="text-xs font-bold truncate">{loc.displayName}</span>
-                        </button>
-                     ))}
+                  
+                  {/* Desktop Vertical List / Mobile Horizontal List */}
+                  <div className="flex lg:flex-col overflow-x-auto lg:overflow-y-auto lg:max-h-60 p-2 gap-1 lg:gap-1 scrollbar-hide">
+                     {locations.length === 0 ? (
+                        <p className="text-[10px] text-neutral-400 italic p-3 w-full text-center">No units active</p>
+                     ) : (
+                        locations.map(loc => (
+                           <button
+                             key={loc.id}
+                             onClick={() => setSelectedUid(loc.uid)}
+                             className={`flex items-center gap-3 p-3 rounded-2xl transition-all shrink-0 lg:shrink ${
+                               selectedUid === loc.uid ? 'bg-orange-600 text-white' : 'hover:bg-neutral-100 text-neutral-700'
+                             }`}
+                           >
+                             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
+                               selectedUid === loc.uid ? 'bg-white text-orange-600 shadow-sm' : 'bg-neutral-200 text-neutral-500'
+                             }`}>
+                               {loc.displayName?.[0] || 'U'}
+                             </div>
+                             <span className="text-xs font-bold truncate max-w-[80px] lg:max-w-none">{loc.displayName}</span>
+                             {selectedUid === loc.uid && <div className="w-1.5 h-1.5 bg-white rounded-full lg:block hidden shrink-0" />}
+                           </button>
+                        ))
+                     )}
                   </div>
                </div>
             </div>
