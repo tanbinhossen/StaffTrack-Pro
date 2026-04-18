@@ -1,0 +1,8 @@
+{
+  "name": "LiveLoc - Real-time Location Tracker",
+  "description": "An Android-style PWA for sharing real-time location with admins, emphasizing user consent and privacy.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": []
+}
